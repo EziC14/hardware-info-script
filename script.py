@@ -2,6 +2,12 @@ import subprocess
 import csv
 import os
 import re
+import sys
+from colorama import Fore, Style, init
+import time
+
+# Inicializar colorama
+init(autoreset=True)
 
 def run_cmd(cmd, use_powershell=False):
     if use_powershell:
@@ -10,13 +16,23 @@ def run_cmd(cmd, use_powershell=False):
     return result.stdout.strip()
 
 def bytes_to_gb(size_str):
-    """Convierte bytes a GB, si es número válido"""
     try:
         size_int = int(size_str)
-        gb = round(size_int / (1024 ** 3), 2)  # 2 decimales
+        gb = round(size_int / (1024 ** 3), 2)
         return f"{gb} GB"
     except:
         return size_str.strip()
+
+# ------------------- BANNER -------------------
+print(Fore.CYAN + Style.BRIGHT + r"""
+ __        __   _                            _             
+ \ \      / /__| | ___ ___  _ __ ___   ___  | |_ ___       
+  \ \ /\ / / _ \ |/ __/ _ \| '_ ` _ \ / _ \ | __/ _ \      
+   \ V  V /  __/ | (_| (_) | | | | | |  __/ | || (_) |     
+    \_/\_/ \___|_|\___\___/|_| |_| |_|\___|  \__\___/      
+                                                         
+""")
+print(Fore.YELLOW + "🔍 Recolectando información de tu PC... por favor espera.\n")
 
 # ------------------- COMANDOS BÁSICOS -------------------
 marca = run_cmd("wmic computersystem get manufacturer").splitlines()[-1].strip()
@@ -35,16 +51,9 @@ ram_raw = run_cmd(
 )
 
 dict_type_ram = {
-    "20": "DDR",
-    "21": "DDR2",
-    "22": "DDR2 FB-DIMM",
-    "24": "DDR3",
-    "26": "DDR4",
-    "27": "LPDDR",
-    "28": "LPDDR2",
-    "29": "LPDDR3",
-    "30": "LPDDR4",
-    "31": "Logical non-volatile device"
+    "20": "DDR", "21": "DDR2", "22": "DDR2 FB-DIMM",
+    "24": "DDR3", "26": "DDR4", "27": "LPDDR",
+    "28": "LPDDR2", "29": "LPDDR3", "30": "LPDDR4", "31": "Logical non-volatile device"
 }
 
 ram_list = []
@@ -78,12 +87,14 @@ for line in disco_raw.splitlines():
 disco_str = " | ".join(disco_list)
 
 # ------------------- DATOS DEL USUARIO -------------------
-nombre = input("Nombre del Usuario: ")
-apellido = input("Apellido: ")
-usurio = input("Usuario: ")
-area = input("Área: ")
-cargo = input("Cargo: ")
-office = input("Microsoft Office: ")
+print(Fore.GREEN + "\n💻 Ahora ingresa los datos del usuario:\n")
+
+nombre = input(Fore.CYAN + " ➤ Nombre del Usuario: " + Style.RESET_ALL)
+apellido = input(Fore.CYAN + " ➤ Apellido: " + Style.RESET_ALL)
+usurio = input(Fore.CYAN + " ➤ Usuario: " + Style.RESET_ALL)
+area = input(Fore.CYAN + " ➤ Área: " + Style.RESET_ALL)
+cargo = input(Fore.CYAN + " ➤ Cargo: " + Style.RESET_ALL)
+office = input(Fore.CYAN + " ➤ Microsoft Office: " + Style.RESET_ALL)
 
 # ------------------- DICCIONARIO FINAL -------------------
 info = {
@@ -108,10 +119,19 @@ info = {
 archivo_csv = r"\\192.168.1.20\Aplicaciones\Inventario\inventario_pcs.csv"
 existe = os.path.isfile(archivo_csv)
 
+# Animación de "guardando..."
+print(Fore.YELLOW + "\n Extrayendo información", end="", flush=True)
+for i in range(10):  # cantidad de puntos que se mostrarán
+    print(".", end="", flush=True)
+    time.sleep(0.5)  # espera medio segundo entre cada punto
+print("")
+
 with open(archivo_csv, mode='a', newline='', encoding='utf-8') as file:
     writer = csv.DictWriter(file, fieldnames=info.keys())
     if not existe:
         writer.writeheader()
     writer.writerow(info)
 
-print(f"\n✅ Información guardada correctamente en '{archivo_csv}'")
+print(Fore.MAGENTA + Style.BRIGHT + "\n✨ ¡Información recolectada exitosamente! ✨")
+print(Fore.GREEN + "✅ Todo salió bien, ya puedes cerrar esta ventana.\n")
+input(Fore.CYAN + "\nPresiona ENTER para salir...")
