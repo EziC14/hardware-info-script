@@ -18,7 +18,6 @@ jobs:
           pip install pyinstaller
           python -m PyInstaller --onefile script.py
 
-      - name: Copy to NAS
-        shell: pwsh
-        run: |
-          Copy-Item "dist\script.exe" "\\192.168.1.20\Aplicaciones\Inventario\script.exe" -Force
+      - name: Copiar script
+        run: Copy-Item "dist\script.exe" "\\192.168.1.20\Aplicaciones\Inventario\script.exe" -Force
+        shell: powershell
