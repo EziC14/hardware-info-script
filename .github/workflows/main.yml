@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     runs-on: self-hosted
-    
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -16,8 +16,9 @@ jobs:
       - name: Build EXE
         run: |
           pip install pyinstaller
-          pyinstaller --onefile script.py
+          python -m PyInstaller --onefile script.py
 
       - name: Copy to NAS
+        shell: pwsh
         run: |
-          copy dist\script.exe "\\192.168.1.20\Aplicaciones\Inventario\script.exe"
+          Copy-Item "dist\script.exe" "\\192.168.1.20\Aplicaciones\Inventario\script.exe" -Force
