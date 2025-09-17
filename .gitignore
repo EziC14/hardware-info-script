@@ -1,0 +1,19 @@
+# Ignore node_modules
+node_modules/
+
+# Ignore log files
+*.log
+
+# Ignore IDE-specific files
+.idea/
+.vscode/
+*.swp
+
+# Ignore compiled files
+*.js
+*.css
+*.html
+
+# Ignore build output
+/dist/
+/build/
