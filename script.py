@@ -1,3 +1,4 @@
+import io
 import subprocess
 import csv
 import os
@@ -45,29 +46,29 @@ windows = run_cmd("wmic os get caption").splitlines()[-1].strip()
 
 # ------------------- RAM DETALLADA -------------------
 ram_raw = run_cmd(
-    "Get-CimInstance -ClassName Win32_PhysicalMemory | "
-    "Select-Object Manufacturer, Speed, Capacity, SMBIOSMemoryType | Format-Table -HideTableHeaders",
+    'Get-CimInstance -ClassName Win32_PhysicalMemory | '
+    'Select-Object Manufacturer, Speed, Capacity, SMBIOSMemoryType | ConvertTo-Csv -NoTypeInformation',
     use_powershell=True
 )
 
+ram_list = []
 dict_type_ram = {
     "20": "DDR", "21": "DDR2", "22": "DDR2 FB-DIMM",
     "24": "DDR3", "26": "DDR4", "27": "LPDDR",
     "28": "LPDDR2", "29": "LPDDR3", "30": "LPDDR4", "31": "Logical non-volatile device"
 }
 
-ram_list = []
-for line in ram_raw.splitlines():
-    parts = re.split(r"\s+", line.strip())
-    if len(parts) >= 4:
-        manufacturer = parts[0]
-        speed = parts[1] + "MHz"
-        capacity = bytes_to_gb(parts[2])
-        mem_code = parts[3]
-        mem_type = dict_type_ram.get(mem_code, f"Desconocido({mem_code})")  
-        ram_list.append(f"{manufacturer} {speed} {capacity} {mem_type}")
+for row in csv.reader(io.StringIO(ram_raw)):
+    if row[0] == "Manufacturer":
+        continue  # saltar header
+    manufacturer = row[0]
+    speed = row[1] + " MHz"
+    capacity = bytes_to_gb(row[2])
+    mem_type = dict_type_ram.get(row[3], f"Desconocido({row[3]})")
+    ram_list.append(f"{manufacturer} {speed} {capacity} {mem_type}")
 
 ram_str = " | ".join(ram_list)
+print(ram_str)
 
 # ------------------- DISCO DETALLADO -------------------
 disco_raw = run_cmd(
